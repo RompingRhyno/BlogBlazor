@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace BlogBlazor.ApiService.Data;
+namespace BlogLibrary.Data;
 
 public class ApplicationDbContext : IdentityDbContext<User>
 {
@@ -19,11 +19,5 @@ public class ApplicationDbContext : IdentityDbContext<User>
 
         builder.Entity<Article>().Property(c => c.ArticleId).IsRequired();
         builder.Entity<Article>().ToTable("Articles");
-    }
-
-    public void Seed(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
-    {
-        // Seed data logic here
-        SeedData.Initialize(this, userManager, roleManager).Wait();
     }
 }

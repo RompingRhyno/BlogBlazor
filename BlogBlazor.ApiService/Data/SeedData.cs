@@ -1,21 +1,19 @@
 using System;
-using BlogLibrary;
+using BlogBlazor.ApiService.Data;
+using BlogLibrary.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using BlogBlazor.ApiService.Data;
 
 public static class SeedData
 {
-    public static async Task Initialize(ApplicationDbContext context,
+    public static async Task Initialize(
+        ApplicationDbContext context,
         UserManager<User> userManager,
-        RoleManager<IdentityRole> roleManager)
+        RoleManager<IdentityRole> roleManager
+    )
     {
-        Console.WriteLine("Starting database seeding...");
-
         // Ensure the database is created and migrated
-        Console.WriteLine("Applying migrations...");
         await context.Database.MigrateAsync();
-        Console.WriteLine("Migrations applied successfully.");
 
         // Seed roles
         string[] roleNames = new[] { "Admin", "Contributor" };
@@ -24,133 +22,103 @@ public static class SeedData
             var roleExist = await roleManager.RoleExistsAsync(roleName);
             if (!roleExist)
             {
-                Console.WriteLine($"Creating role: {roleName}");
                 await roleManager.CreateAsync(new IdentityRole(roleName));
-            }
-            else
-            {
-                Console.WriteLine($"Role already exists: {roleName}");
             }
         }
 
         // Seed Admin user
-        try
-        {
-            var adminEmail = Environment.GetEnvironmentVariable("ADMIN_EMAIL")
-                ?? throw new InvalidOperationException("ADMIN_EMAIL environment variable is missing.");
-            var adminPassword = Environment.GetEnvironmentVariable("ADMIN_PASSWORD")
-                ?? throw new InvalidOperationException("ADMIN_PASSWORD environment variable is missing.");
-            var adminFirstName = Environment.GetEnvironmentVariable("ADMIN_FIRSTNAME") ?? "Admin";
-            var adminLastName = Environment.GetEnvironmentVariable("ADMIN_LASTNAME") ?? "User";
+        var adminEmail =
+            Environment.GetEnvironmentVariable("ADMIN_EMAIL")
+            ?? throw new InvalidOperationException("ADMIN_EMAIL environment variable is missing.");
+        var adminPassword =
+            Environment.GetEnvironmentVariable("ADMIN_PASSWORD")
+            ?? throw new InvalidOperationException(
+                "ADMIN_PASSWORD environment variable is missing."
+            );
+        var adminFirstName = Environment.GetEnvironmentVariable("ADMIN_FIRSTNAME") ?? "Admin";
+        var adminLastName = Environment.GetEnvironmentVariable("ADMIN_LASTNAME") ?? "User";
 
-            var adminUser = await userManager.FindByEmailAsync(adminEmail);
-            if (adminUser == null)
-            {
-                Console.WriteLine($"Creating admin user: {adminEmail}");
-                adminUser = new User
-                {
-                    UserName = adminEmail,
-                    Email = adminEmail,
-                    FirstName = adminFirstName,
-                    LastName = adminLastName
-                };
-                var result = await userManager.CreateAsync(adminUser, adminPassword);
-                if (result.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(adminUser, "Admin");
-                    Console.WriteLine($"Admin user {adminEmail} created successfully.");
-                }
-                else
-                {
-                    Console.WriteLine($"Failed to create admin user: {string.Join(", ", result.Errors)}");
-                }
-            }
-            else
-            {
-                Console.WriteLine($"Admin user {adminEmail} already exists.");
-            }
-        }
-        catch (Exception ex)
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+        if (adminUser == null)
         {
-            Console.WriteLine($"Error seeding admin user: {ex.Message}");
+            adminUser = new User
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                FirstName = adminFirstName,
+                LastName = adminLastName,
+            };
+            var result = await userManager.CreateAsync(adminUser, adminPassword);
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(adminUser, "Admin");
+            }
         }
 
         // Seed Contributor user
-        try
-        {
-            var contributorEmail = Environment.GetEnvironmentVariable("CONTRIBUTOR_EMAIL")
-                ?? throw new InvalidOperationException("CONTRIBUTOR_EMAIL environment variable is missing.");
-            var contributorPassword = Environment.GetEnvironmentVariable("CONTRIBUTOR_PASSWORD")
-                ?? throw new InvalidOperationException("CONTRIBUTOR_PASSWORD environment variable is missing.");
-            var contributorFirstName = Environment.GetEnvironmentVariable("CONTRIBUTOR_FIRSTNAME") ?? "Contributor";
-            var contributorLastName = Environment.GetEnvironmentVariable("CONTRIBUTOR_LASTNAME") ?? "User";
+        var contributorEmail =
+            Environment.GetEnvironmentVariable("CONTRIBUTOR_EMAIL")
+            ?? throw new InvalidOperationException(
+                "CONTRIBUTOR_EMAIL environment variable is missing."
+            );
+        var contributorPassword =
+            Environment.GetEnvironmentVariable("CONTRIBUTOR_PASSWORD")
+            ?? throw new InvalidOperationException(
+                "CONTRIBUTOR_PASSWORD environment variable is missing."
+            );
+        var contributorFirstName =
+            Environment.GetEnvironmentVariable("CONTRIBUTOR_FIRSTNAME") ?? "Contributor";
+        var contributorLastName =
+            Environment.GetEnvironmentVariable("CONTRIBUTOR_LASTNAME") ?? "User";
 
-            var contributorUser = await userManager.FindByEmailAsync(contributorEmail);
-            if (contributorUser == null)
-            {
-                Console.WriteLine($"Creating contributor user: {contributorEmail}");
-                contributorUser = new User
-                {
-                    UserName = contributorEmail,
-                    Email = contributorEmail,
-                    FirstName = contributorFirstName,
-                    LastName = contributorLastName
-                };
-                var result = await userManager.CreateAsync(contributorUser, contributorPassword);
-                if (result.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(contributorUser, "Contributor");
-                    Console.WriteLine($"Contributor user {contributorEmail} created successfully.");
-                }
-                else
-                {
-                    Console.WriteLine($"Failed to create contributor user: {string.Join(", ", result.Errors)}");
-                }
-            }
-            else
-            {
-                Console.WriteLine($"Contributor user {contributorEmail} already exists.");
-            }
-        }
-        catch (Exception ex)
+        var contributorUser = await userManager.FindByEmailAsync(contributorEmail);
+        if (contributorUser == null)
         {
-            Console.WriteLine($"Error seeding contributor user: {ex.Message}");
+            contributorUser = new User
+            {
+                UserName = contributorEmail,
+                Email = contributorEmail,
+                FirstName = contributorFirstName,
+                LastName = contributorLastName,
+            };
+            var result = await userManager.CreateAsync(contributorUser, contributorPassword);
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(contributorUser, "Contributor");
+            }
         }
 
         // Seed a sample article for the Contributor user
-        try
+        var existingArticle = await context.Articles.FirstOrDefaultAsync(a =>
+            a.Title == "The Rise of AI in Everyday Life: Transforming the Future"
+        );
+        if (existingArticle == null)
         {
-            Console.WriteLine("Checking if sample article exists...");
-            var existingArticle = await context.Articles
-                .FirstOrDefaultAsync(a => a.Title == "The Rise of AI in Everyday Life: Transforming the Future");
-            if (existingArticle == null)
+            var article = new Article
             {
-                Console.WriteLine("Seeding sample article...");
-                var article = new Article
-                {
-                    Title = "The Rise of AI in Everyday Life: Transforming the Future",
-                    Body = @"
-                    Artificial Intelligence (AI) has rapidly become one of the most transformative technologies of the 21st century...",
-                    CreateDate = DateTime.UtcNow,
-                    StartDate = DateTime.UtcNow,
-                    EndDate = DateTime.UtcNow.AddDays(7), // End date is 7 days later
-                    ContributorUsername = Environment.GetEnvironmentVariable("CONTRIBUTOR_EMAIL")
-                };
+                Title = "The Rise of AI in Everyday Life: Transforming the Future",
+                Body =
+                    @"
+                Artificial Intelligence (AI) has rapidly become one of the most transformative technologies of the 21st century. From healthcare to finance, AI is revolutionizing industries, enhancing human capabilities, and reshaping the way we live and work.
 
-                await context.Articles.AddAsync(article);
-                await context.SaveChangesAsync();
-                Console.WriteLine("Sample article seeded successfully.");
-            }
-            else
-            {
-                Console.WriteLine("Sample article already exists.");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error seeding article: {ex.Message}");
-        }
+                In healthcare, AI algorithms are now able to analyze medical images, predict patient outcomes, and assist doctors in diagnosing diseases with unprecedented accuracy. Machine learning models are being used to develop personalized treatment plans, leading to more effective and efficient care.
 
-        Console.WriteLine("Database seeding completed.");
+                In finance, AI is helping detect fraudulent activities, optimize trading strategies, and provide better customer service through chatbots and virtual assistants. These advancements not only improve the efficiency of financial institutions but also help customers make smarter financial decisions.
+
+                However, the integration of AI into our daily lives raises several ethical questions. While AI holds immense potential, its impact on jobs, privacy, and decision-making must be carefully considered. As AI continues to evolve, it is crucial for developers, policymakers, and society to collaborate in creating frameworks that ensure responsible and transparent use of this powerful technology.
+
+                As we look to the future, the possibilities seem endless. The potential for AI to revolutionize everything from autonomous vehicles to smart cities is just beginning to unfold. It’s clear that AI will continue to shape the world in ways we can only begin to imagine.
+
+                The question is no longer whether AI will change our lives, but how we will adapt to this new, intelligent world.",
+                CreateDate = DateTime.UtcNow,
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(7), // End date is 7 days later
+                Contributor = contributorUser, // Set the navigation property directly
+                ContributorUsername = contributorEmail, // Set the foreign key directly
+            };
+
+            await context.Articles.AddAsync(article);
+            await context.SaveChangesAsync();
+        }
     }
 }

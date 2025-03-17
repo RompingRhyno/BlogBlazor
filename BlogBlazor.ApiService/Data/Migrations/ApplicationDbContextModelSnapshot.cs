@@ -17,12 +17,12 @@ namespace BlogBlazor.ApiService.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.2")
+                .HasAnnotation("ProductVersion", "9.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("BlogLibrary.Article", b =>
+            modelBuilder.Entity("BlogLibrary.Models.Article", b =>
                 {
                     b.Property<int>("ArticleId")
                         .ValueGeneratedOnAdd()
@@ -60,7 +60,7 @@ namespace BlogBlazor.ApiService.Data.Migrations
                     b.ToTable("Articles", (string)null);
                 });
 
-            modelBuilder.Entity("BlogLibrary.User", b =>
+            modelBuilder.Entity("BlogLibrary.Models.User", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -266,9 +266,9 @@ namespace BlogBlazor.ApiService.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("BlogLibrary.Article", b =>
+            modelBuilder.Entity("BlogLibrary.Models.Article", b =>
                 {
-                    b.HasOne("BlogLibrary.User", "Contributor")
+                    b.HasOne("BlogLibrary.Models.User", "Contributor")
                         .WithMany()
                         .HasForeignKey("ContributorId");
 
@@ -286,7 +286,7 @@ namespace BlogBlazor.ApiService.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("BlogLibrary.User", null)
+                    b.HasOne("BlogLibrary.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -295,7 +295,7 @@ namespace BlogBlazor.ApiService.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("BlogLibrary.User", null)
+                    b.HasOne("BlogLibrary.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -310,7 +310,7 @@ namespace BlogBlazor.ApiService.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BlogLibrary.User", null)
+                    b.HasOne("BlogLibrary.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -319,7 +319,7 @@ namespace BlogBlazor.ApiService.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("BlogLibrary.User", null)
+                    b.HasOne("BlogLibrary.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

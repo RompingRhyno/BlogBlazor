@@ -1,0 +1,52 @@
+@page "/article/{id:int}"
+@rendermode InteractiveServer
+@inject ArticleApiClient ArticleApi
+@using BlogLibrary.Models
+
+
+<PageTitle>@(article?.Title ?? "Article Details")</PageTitle>
+
+@if (article == null)
+{
+    <p>Loading article...</p>
+}
+else
+{
+    <h2>@article.Title</h2>
+    <p>
+        <strong>
+            @if (!string.IsNullOrEmpty(article.ContributorUsername))
+            {
+                @article.ContributorUsername
+            }
+            else
+            {
+                @("Unknown Author")
+            }
+        </strong>, @article.CreateDate?.ToString("MMMM dd, yyyy")
+    </p>
+
+    <!-- Render sanitized Body as raw HTML -->
+    <div>
+        @((MarkupString)(article.Body ?? string.Empty))
+    </div>
+
+    <a href="/">Back to Articles</a>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private Article? article;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            article = await ArticleApi.GetArticleByIdAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching article: {ex.Message}");
+        }
+    }
+}
