@@ -41,6 +41,22 @@ builder.Services.AddCors(o =>
 // Add service defaults & Aspire components
 builder.AddServiceDefaults();
 
+var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__blogdb");
+if (connectionString == null) {
+    // no Aspire
+    Console.WriteLine("Connection string 'blogdb' not found. Using default connection string.");
+    connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    if (connectionString == null) {
+        throw new InvalidOperationException("Connection string not found.");
+    }
+}
+
+Console.WriteLine($"Connection string: {connectionString}");
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString)
+);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
