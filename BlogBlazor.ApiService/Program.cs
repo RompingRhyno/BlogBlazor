@@ -7,8 +7,6 @@ using Microsoft.EntityFrameworkCore;
 Env.Load(); // This loads the .env file
 var builder = WebApplication.CreateBuilder(args);
 
-builder.AddSqlServerDbContext<ApplicationDbContext>("sqldata");
-
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -41,7 +39,7 @@ builder.Services.AddCors(o =>
 // Add service defaults & Aspire components
 builder.AddServiceDefaults();
 
-var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__blogdb");
+var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__sqldata");
 if (connectionString == null) {
     // no Aspire
     Console.WriteLine("Connection string 'blogdb' not found. Using default connection string.");
@@ -68,6 +66,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("Policy");
+app.UseAuthorization();
+
 
 // Endpoint to retrieve all articles (GET)
 app.MapGet("/api/articles", async (ApplicationDbContext db) => await db.Articles.ToListAsync());
@@ -127,7 +127,6 @@ app.MapGet(
 //     }
 // );
 
-app.UseAuthorization();
 app.MapControllers();
 
 // Migrate & Seed Database
