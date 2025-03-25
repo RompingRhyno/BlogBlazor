@@ -1,5 +1,6 @@
 using BlogBlazor.Web;
 using BlogBlazor.Web.Components;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,7 @@ app.UseAntiforgery();
 
 app.UseOutputCache();
 
+app.MapStaticAssets();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.MapDefaultEndpoints();
