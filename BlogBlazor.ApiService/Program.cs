@@ -40,11 +40,13 @@ builder.Services.AddCors(o =>
 builder.AddServiceDefaults();
 
 var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__sqldata");
-if (connectionString == null) {
+if (connectionString == null)
+{
     // no Aspire
     Console.WriteLine("Connection string 'blogdb' not found. Using default connection string.");
     connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    if (connectionString == null) {
+    if (connectionString == null)
+    {
         throw new InvalidOperationException("Connection string not found.");
     }
 }
@@ -67,7 +69,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("Policy");
 app.UseAuthorization();
-
 
 // Endpoint to retrieve all articles (GET)
 app.MapGet("/api/articles", async (ApplicationDbContext db) => await db.Articles.ToListAsync());
