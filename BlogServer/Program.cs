@@ -1,3 +1,4 @@
+using BlogLibrary.Models;
 using BlogServer.Components;
 using BlogServer.Components.Account;
 using BlogServer.Data;
@@ -40,7 +41,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Identity Configuration
 builder
-    .Services.AddIdentityCore<ApplicationUser>(options =>
+    .Services.AddIdentityCore<User>(options =>
     {
         options.Password.RequireUppercase = true;
         options.Password.RequireLowercase = true;
@@ -63,7 +64,7 @@ builder
     })
     .AddIdentityCookies();
 
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddSingleton<IEmailSender<User>, IdentityNoOpEmailSender>();
 
 var app = builder.Build();
 

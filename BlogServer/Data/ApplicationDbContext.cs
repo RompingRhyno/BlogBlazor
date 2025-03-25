@@ -20,4 +20,5 @@ public class ApplicationDbContext : IdentityDbContext<User>
         builder.Entity<Article>().Property(c => c.ArticleId).IsRequired();
         builder.Entity<Article>().ToTable("Articles");
     }
+
 }

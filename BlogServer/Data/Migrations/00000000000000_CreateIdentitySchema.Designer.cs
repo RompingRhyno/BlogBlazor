@@ -20,7 +20,7 @@ namespace BlogServer.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
 
-            modelBuilder.Entity("BlogServer.Data.ApplicationUser", b =>
+            modelBuilder.Entity("BlogServer.Data.User", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
@@ -223,7 +223,7 @@ namespace BlogServer.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("BlogServer.Data.ApplicationUser", null)
+                    b.HasOne("BlogServer.Data.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -232,7 +232,7 @@ namespace BlogServer.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("BlogServer.Data.ApplicationUser", null)
+                    b.HasOne("BlogServer.Data.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -247,7 +247,7 @@ namespace BlogServer.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BlogServer.Data.ApplicationUser", null)
+                    b.HasOne("BlogServer.Data.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -256,7 +256,7 @@ namespace BlogServer.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("BlogServer.Data.ApplicationUser", null)
+                    b.HasOne("BlogServer.Data.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
