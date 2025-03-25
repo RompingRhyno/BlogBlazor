@@ -6,4 +6,3 @@ namespace BlogServer.Data;
 public class ApplicationUser : IdentityUser
 {
 }
-
