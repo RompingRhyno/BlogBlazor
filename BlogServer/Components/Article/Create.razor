@@ -2,6 +2,9 @@
 @using BlogLibrary.Models
 @using System.ComponentModel.DataAnnotations
 @using BlogServer.Services
+
+@rendermode InteractiveServer
+
 @inject UserService UserService
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
@@ -26,25 +29,20 @@
 
     <div class="form-group">
         <label for="StartDate">Start Date</label>
-        <input type="datetime-local" 
-               @bind="ArticleModel.StartDate" 
-               @bind:format="yyyy-MM-ddTHH:mm"
-               class="form-control" 
-               id="StartDate" />
+        <InputDate @bind-Value="ArticleModel.StartDate" 
+                 class="form-control" 
+                 id="StartDate" />
         <ValidationMessage For="@(() => ArticleModel.StartDate)" />
     </div>
 
     <div class="form-group">
         <label for="EndDate">End Date</label>
-        <input type="datetime-local" 
-               @bind="ArticleModel.EndDate" 
-               @bind:format="yyyy-MM-ddTHH:mm"
-               class="form-control" 
-               id="EndDate" />
+        <InputDate @bind-Value="ArticleModel.EndDate" 
+                 class="form-control" 
+                 id="EndDate" />
         <ValidationMessage For="@(() => ArticleModel.EndDate)" />
     </div>
 
-    <br>
     <div class="form-group">
         <button type="submit" class="btn btn-primary">Create</button>
         <button type="button" @onclick="Cancel" class="btn btn-secondary ml-2">Cancel</button>
@@ -56,8 +54,11 @@
 
     protected override void OnInitialized()
     {
-        // Initialize with default values if needed
         ArticleModel.CreateDate = DateTime.Now;
+        
+        // Initialize dates if needed
+        ArticleModel.StartDate ??= DateTime.Today;
+        ArticleModel.EndDate ??= DateTime.Today.AddDays(7);
     }
 
     private async Task HandleValidSubmit()

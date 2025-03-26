@@ -1,7 +1,9 @@
 @page "/admin/manageUsers"
 @using BlogServer.Services
 @using BlogLibrary.Models
+
 @rendermode InteractiveServer
+
 @attribute [Authorize(Roles = "Admin")]
 
 @inject AdminService adminService
@@ -10,9 +12,18 @@
 
 <h1>Manage Users</h1>
 
-@if (userRoles == null)
+@if (isLoading)
 {
-    <p>Loading users...</p>
+    <div class="text-center p-4">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p>Loading user data...</p>
+    </div>
+}
+else if (userRoles == null || !userRoles.Any())
+{
+    <p>No users found</p>
 }
 else
 {
@@ -43,20 +54,14 @@ else
                     </td>
                     <td>
                         <!-- Checkbox for Contributor role -->
-                        <input type="checkbox" id="isContributor_@item.UserName"
-                            @(item.Roles != null && item.Roles.Contains("Contributor") ? "checked" : "")
-                            onclick="updateRole('@item.UserName', this.checked)" />
+                        <input type="checkbox" 
+                            checked="@(item.Roles?.Contains("Contributor") ?? false)"
+                            @onchange="@(async () => await UpdateRoleAsync(item.UserName, !(item.Roles?.Contains("Contributor") ?? false)))" />                    
                     </td>
                     <td>
-                        @* <a class="btn btn-primary btn-sm" href="/admin/editUser/@item.UserName">Edit</a> *@
-                        @* <a asp-action="Edit" asp-route-username="@item.UserName" class="btn btn-primary">Edit</a> *@
                         <button class="btn btn-primary btn-sm" @onclick="@(() => EditUser(item.UserName!))">Edit</button>
                     </td>
                     <td>
-                        @* <a class="btn btn-success btn-sm" href="/admin/userDetails/@item.UserName">Details</a> *@
-                        @* <form asp-action="Details" asp-route-username="@item.UserName">
-                            <button type="submit" class="btn btn-success">Details</button>
-                        </form> *@
                         <button class="btn btn-success btn-sm" @onclick="@(() => ViewDetails(item.UserName!))">Details</button>
                     </td>
                     <td>
@@ -64,8 +69,6 @@ else
                         @if (item.Roles != null && !item.Roles.Contains("Admin"))
                         {
                             <button class="btn btn-danger btn-sm" @onclick="@(() => ConfirmBan(item.UserName!))">Ban</button>
-                            @* <a class="btn btn-danger btn-sm" href="/admin/delete/@item.UserName">Ban</a> *@
-                            @* <button class="btn btn-danger" onclick="confirmBan('@item.UserName')">Ban</button> *@
                         }
                     </td>
                 </tr>
@@ -76,23 +79,55 @@ else
 
 @code {
     private List<UserRoleViewModel>? userRoles;
+    private bool isLoading = true;
+    private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadUsers();
+        try
+        {
+            await LoadUsers();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to load users: {ex.Message}";
+            Console.WriteLine(errorMessage);
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
     private async Task LoadUsers()
     {
-        userRoles = await adminService.GetAllUserRolesAsync(); // Call service method  
+        isLoading = true;
+        StateHasChanged();
+        try
+        {
+            userRoles = await adminService.GetAllUserRolesAsync(); // Call service method  
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
     private async Task UpdateRoleAsync(string userName, bool isContributor)
     {
-        var success = await adminService.UpdateRolesAsync(userName, isContributor);        
-        if (success)
+        try {
+            var success = await adminService.UpdateRolesAsync(userName, isContributor);        
+            if (!success)
+            {
+                await _jsRuntime.InvokeVoidAsync("alert", "Failed to update role");
+            }
+        }
+        catch (Exception ex)
         {
-            await LoadUsers(); // Refresh the user list
+            await _jsRuntime.InvokeVoidAsync("alert", $"Error: {ex.Message}");
+        }
+        finally
+        {
             StateHasChanged();
         }
     }

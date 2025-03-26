@@ -1,6 +1,9 @@
 ﻿@page "/article/details/{ArticleId:int}"
 @using BlogLibrary.Models
 @using BlogServer.Services
+
+@rendermode InteractiveServer
+
 @inject UserService UserService
 @inject NavigationManager NavigationManager
 
