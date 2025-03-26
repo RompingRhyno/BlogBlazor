@@ -53,6 +53,9 @@
     {
         article = await UserService.GetArticleDetailsAsync(ArticleId) ?? new();
         
+        // Set the contributor before saving
+        article.ContributorUsername = await UserService.GetCurrentUsername();
+
         // Ensure dates are in local time for display
         if (article.StartDate.HasValue)
             article.StartDate = DateTime.SpecifyKind(article.StartDate.Value, DateTimeKind.Local);
@@ -72,7 +75,7 @@
             if (article.EndDate.HasValue)
                 article.EndDate = DateTime.SpecifyKind(article.EndDate.Value, DateTimeKind.Utc);
 
-            var success = await UserService.EditArticleAsync(article.ArticleId, article, GetCurrentUsername());
+            var success = await UserService.EditArticleAsync(article.ArticleId, article, article.ContributorUsername!);
             
             if (success)
             {
@@ -88,12 +91,5 @@
     private void Cancel()
     {
         NavigationManager.NavigateTo("/");
-    }
-
-    private string GetCurrentUsername()
-    {
-        // You'll need to implement this based on your auth system
-        // Example: return authStateProvider.GetAuthenticationStateAsync().Result.User.Identity?.Name;
-        return string.Empty;
     }
 }
