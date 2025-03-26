@@ -90,8 +90,8 @@ else
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseAntiforgery();
 app.UseAuthentication();
+app.UseAntiforgery();
 app.UseAuthorization();
 
 app.MapStaticAssets();
