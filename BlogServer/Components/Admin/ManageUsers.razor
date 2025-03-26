@@ -56,7 +56,7 @@ else
                         <!-- Checkbox for Contributor role -->
                         <input type="checkbox" 
                             checked="@(item.Roles?.Contains("Contributor") ?? false)"
-                            @onchange="@(async () => await UpdateRoleAsync(item.UserName, !(item.Roles?.Contains("Contributor") ?? false)))" />                    
+                            @onchange="@(async () => await UpdateRoleAsync(item.UserName!, !(item.Roles?.Contains("Contributor") ?? false)))" />                    
                     </td>
                     <td>
                         <button class="btn btn-primary btn-sm" @onclick="@(() => EditUser(item.UserName!))">Edit</button>

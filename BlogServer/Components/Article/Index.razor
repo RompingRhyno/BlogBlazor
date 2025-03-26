@@ -96,8 +96,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         articles = await UserService.GetAllArticlesAsync();
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        currentUsername = authState.User.Identity?.Name;
+        currentUsername = await UserService.GetCurrentUsername();
     }
 
     private void CreateArticle()
