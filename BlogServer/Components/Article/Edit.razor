@@ -1,0 +1,96 @@
+﻿@page "/article/edit/{ArticleId:int}"
+@using BlogLibrary.Models
+@using BlogServer.Services
+@inject UserService UserService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<h2>Edit Article</h2>
+
+<EditForm Model="@article" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="Title">Title</label>
+        <InputText @bind-Value="article.Title" class="form-control" id="Title" />
+        <ValidationMessage For="@(() => article.Title)" />
+    </div>
+
+    <div class="form-group">
+        <label for="Body">Body</label>
+        <InputTextArea @bind-Value="article.Body" class="form-control" id="Body" rows="10" />
+        <ValidationMessage For="@(() => article.Body)" />
+    </div>
+
+    <div class="form-group">
+        <label for="StartDate">Start Date</label>
+        <InputDate @bind-Value="article.StartDate" class="form-control" id="StartDate" />
+        <ValidationMessage For="@(() => article.StartDate)" />
+    </div>
+
+    <div class="form-group">
+        <label for="EndDate">End Date</label>
+        <InputDate @bind-Value="article.EndDate" class="form-control" id="EndDate" />
+        <ValidationMessage For="@(() => article.EndDate)" />
+    </div>
+
+    <br>
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <button type="button" @onclick="Cancel" class="btn btn-secondary">Cancel</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int ArticleId { get; set; }
+
+    private Article article = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        article = await UserService.GetArticleDetailsAsync(ArticleId) ?? new();
+        
+        // Ensure dates are in local time for display
+        if (article.StartDate.HasValue)
+            article.StartDate = DateTime.SpecifyKind(article.StartDate.Value, DateTimeKind.Local);
+        
+        if (article.EndDate.HasValue)
+            article.EndDate = DateTime.SpecifyKind(article.EndDate.Value, DateTimeKind.Local);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            // Convert dates back to UTC before saving
+            if (article.StartDate.HasValue)
+                article.StartDate = DateTime.SpecifyKind(article.StartDate.Value, DateTimeKind.Utc);
+            
+            if (article.EndDate.HasValue)
+                article.EndDate = DateTime.SpecifyKind(article.EndDate.Value, DateTimeKind.Utc);
+
+            var success = await UserService.EditArticleAsync(article.ArticleId, article, GetCurrentUsername());
+            
+            if (success)
+            {
+                NavigationManager.NavigateTo("/");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error saving article: {ex.Message}");
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    private string GetCurrentUsername()
+    {
+        // You'll need to implement this based on your auth system
+        // Example: return authStateProvider.GetAuthenticationStateAsync().Result.User.Identity?.Name;
+        return string.Empty;
+    }
+}

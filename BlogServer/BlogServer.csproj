@@ -6,10 +6,8 @@
     <UserSecretsId>aspnet-BlogServer-2ef4dc1d-a9d4-4e79-8369-fba6d0496fb2</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
-    <None Update="Data\app.db" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="DotNetEnv" />
+    <PackageReference Include="HtmlSanitizer" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />

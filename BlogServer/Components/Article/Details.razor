@@ -1,0 +1,49 @@
+﻿@page "/article/details/{ArticleId:int}"
+@using BlogLibrary.Models
+@using BlogServer.Services
+@inject UserService UserService
+@inject NavigationManager NavigationManager
+
+@if (article == null)
+{
+    <p>Loading article...</p>
+}
+else
+{
+    <h2>@article.Title</h2>
+    <p>
+        <strong>
+            @if (article.Contributor != null)
+            {
+                @($"{article.Contributor.FirstName} {article.Contributor.LastName}")
+            }
+            else
+            {
+                @article.ContributorUsername
+            }
+        </strong>, @article.CreateDate?.ToString("MMMM dd, yyyy")
+    </p>
+
+    <div class="article-content">
+        @((MarkupString)(article.Body ?? string.Empty))
+    </div>
+
+    <button @onclick="BackToList" class="btn btn-secondary mt-3">Back to Articles</button>
+}
+
+@code {
+    [Parameter]
+    public int ArticleId { get; set; }
+
+    private Article? article;
+
+    protected override async Task OnInitializedAsync()
+    {
+        article = await UserService.GetArticleDetailsAsync(ArticleId);
+    }
+
+    private void BackToList()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+}

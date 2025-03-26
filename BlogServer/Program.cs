@@ -2,6 +2,7 @@ using BlogLibrary.Models;
 using BlogServer.Components;
 using BlogServer.Components.Account;
 using BlogServer.Data;
+using BlogServer.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -54,6 +55,11 @@ builder
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<AdminService>();
+builder.Services.AddScoped<UserService>();
+
+builder.Services.AddServerSideBlazor();
 
 // Authentication
 builder

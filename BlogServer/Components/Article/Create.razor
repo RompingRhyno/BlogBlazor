@@ -1,0 +1,96 @@
+﻿@page "/article/create"
+@using BlogLibrary.Models
+@using System.ComponentModel.DataAnnotations
+@using BlogServer.Services
+@inject UserService UserService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<h2>Create New Article</h2>
+
+<EditForm Model="@ArticleModel" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="Title">Title</label>
+        <InputText @bind-Value="ArticleModel.Title" class="form-control" id="Title" />
+        <ValidationMessage For="@(() => ArticleModel.Title)" />
+    </div>
+
+    <div class="form-group">
+        <label for="Body">Content</label>
+        <InputTextArea @bind-Value="ArticleModel.Body" class="form-control" id="Body" rows="10" />
+        <ValidationMessage For="@(() => ArticleModel.Body)" />
+    </div>
+
+    <div class="form-group">
+        <label for="StartDate">Start Date</label>
+        <input type="datetime-local" 
+               @bind="ArticleModel.StartDate" 
+               @bind:format="yyyy-MM-ddTHH:mm"
+               class="form-control" 
+               id="StartDate" />
+        <ValidationMessage For="@(() => ArticleModel.StartDate)" />
+    </div>
+
+    <div class="form-group">
+        <label for="EndDate">End Date</label>
+        <input type="datetime-local" 
+               @bind="ArticleModel.EndDate" 
+               @bind:format="yyyy-MM-ddTHH:mm"
+               class="form-control" 
+               id="EndDate" />
+        <ValidationMessage For="@(() => ArticleModel.EndDate)" />
+    </div>
+
+    <br>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Create</button>
+        <button type="button" @onclick="Cancel" class="btn btn-secondary ml-2">Cancel</button>
+    </div>
+</EditForm>
+
+@code {
+    private Article ArticleModel { get; set; } = new Article();
+
+    protected override void OnInitialized()
+    {
+        // Initialize with default values if needed
+        ArticleModel.CreateDate = DateTime.Now;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            // Convert to UTC before saving
+            if (ArticleModel.StartDate.HasValue)
+                ArticleModel.StartDate = DateTime.SpecifyKind(ArticleModel.StartDate.Value, DateTimeKind.Utc);
+            
+            if (ArticleModel.EndDate.HasValue)
+                ArticleModel.EndDate = DateTime.SpecifyKind(ArticleModel.EndDate.Value, DateTimeKind.Utc);
+
+            var success = await UserService.CreateArticleAsync(ArticleModel, GetCurrentUsername());
+            if (success)
+            {
+                NavigationManager.NavigateTo("/");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error creating article: {ex.Message}");
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    private string GetCurrentUsername()
+    {
+        // Implement based on your authentication system
+        return string.Empty;
+    }
+}

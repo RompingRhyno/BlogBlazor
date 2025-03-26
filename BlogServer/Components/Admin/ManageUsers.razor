@@ -1,0 +1,126 @@
+@page "/admin/manageUsers"
+@using BlogServer.Services
+@using BlogLibrary.Models
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+@inject AdminService adminService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime _jsRuntime
+
+<h1>Manage Users</h1>
+
+@if (userRoles == null)
+{
+    <p>Loading users...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>User Name</th>
+                <th>Roles</th>
+                <th>Contributor Role</th>
+                <th></th>
+                <th>Actions</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in userRoles)
+            {
+                <tr>
+                    <td>@item.UserName</td>
+                    <td>
+                        @if (item.Roles != null)
+                        {
+                            @foreach (var role in item.Roles)
+                            {
+                                <span>@role</span><br />
+                            }
+                        }
+                    </td>
+                    <td>
+                        <!-- Checkbox for Contributor role -->
+                        <input type="checkbox" id="isContributor_@item.UserName"
+                            @(item.Roles != null && item.Roles.Contains("Contributor") ? "checked" : "")
+                            onclick="updateRole('@item.UserName', this.checked)" />
+                    </td>
+                    <td>
+                        @* <a class="btn btn-primary btn-sm" href="/admin/editUser/@item.UserName">Edit</a> *@
+                        @* <a asp-action="Edit" asp-route-username="@item.UserName" class="btn btn-primary">Edit</a> *@
+                        <button class="btn btn-primary btn-sm" @onclick="@(() => EditUser(item.UserName!))">Edit</button>
+                    </td>
+                    <td>
+                        @* <a class="btn btn-success btn-sm" href="/admin/userDetails/@item.UserName">Details</a> *@
+                        @* <form asp-action="Details" asp-route-username="@item.UserName">
+                            <button type="submit" class="btn btn-success">Details</button>
+                        </form> *@
+                        <button class="btn btn-success btn-sm" @onclick="@(() => ViewDetails(item.UserName!))">Details</button>
+                    </td>
+                    <td>
+                        <!-- Only show Ban button if the user is not an Admin -->
+                        @if (item.Roles != null && !item.Roles.Contains("Admin"))
+                        {
+                            <button class="btn btn-danger btn-sm" @onclick="@(() => ConfirmBan(item.UserName!))">Ban</button>
+                            @* <a class="btn btn-danger btn-sm" href="/admin/delete/@item.UserName">Ban</a> *@
+                            @* <button class="btn btn-danger" onclick="confirmBan('@item.UserName')">Ban</button> *@
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<UserRoleViewModel>? userRoles;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        userRoles = await adminService.GetAllUserRolesAsync(); // Call service method  
+    }
+
+    private async Task UpdateRoleAsync(string userName, bool isContributor)
+    {
+        var success = await adminService.UpdateRolesAsync(userName, isContributor);        
+        if (success)
+        {
+            await LoadUsers(); // Refresh the user list
+            StateHasChanged();
+        }
+    }
+
+    private void EditUser(string userName)
+    {
+        NavigationManager.NavigateTo($"/admin/editUser/{userName}");
+    }
+
+    private void ViewDetails(string userName)
+    {
+        NavigationManager.NavigateTo($"/admin/userDetails/{userName}");
+    }
+
+    private async Task ConfirmBan(string userName)
+    {
+        if (await _jsRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to ban {userName}?"))
+        {
+            await BanUser(userName);
+        }
+    }
+
+    private async Task BanUser(string userName)
+    {
+        bool success = await adminService.BanUserAsync(userName);
+        if (success)
+        {
+            await LoadUsers(); // Refresh user list after banning
+        }
+    }
+}

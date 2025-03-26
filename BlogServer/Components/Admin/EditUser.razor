@@ -1,0 +1,164 @@
+@page "/admin/editUser/{username}"
+@using BlogLibrary.Models
+@using Microsoft.AspNetCore.Identity
+
+@inject NavigationManager NavigationManager
+@inject AdminService AdminService
+
+<h1>Edit</h1>
+
+<h4>A User</h4>
+<hr />
+
+@if (UserModel == null)
+{
+    <p>Loading user data...</p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm Model="@UserModel" OnValidSubmit="@HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                
+                <div class="form-group">
+                    <label for="FirstName">First Name</label>
+                    <InputText @bind-Value="UserModel.FirstName" class="form-control" id="FirstName" />
+                    <ValidationMessage For="@(() => UserModel.FirstName)" />
+                </div>
+                
+                <div class="form-group">
+                    <label for="LastName">Last Name</label>
+                    <InputText @bind-Value="UserModel.LastName" class="form-control" id="LastName" />
+                    <ValidationMessage For="@(() => UserModel.LastName)" />
+                </div>
+                
+                <input type="hidden" @bind="UserModel.Id" />
+                
+                <div class="form-group">
+                    <label for="UserName">Username</label>
+                    <InputText @bind-Value="UserModel.UserName" class="form-control" id="UserName" />
+                    <ValidationMessage For="@(() => UserModel.UserName)" />
+                </div>
+                
+                <div class="form-group">
+                    <label for="Email">Email</label>
+                    <InputText @bind-Value="UserModel.Email" class="form-control" id="Email" />
+                    <ValidationMessage For="@(() => UserModel.Email)" />
+                </div>
+                
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        <InputCheckbox @bind-Value="UserModel.EmailConfirmed" class="form-check-input" />
+                        Email Confirmed
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label for="PhoneNumber">Phone Number</label>
+                    <InputText @bind-Value="UserModel.PhoneNumber" class="form-control" id="PhoneNumber" />
+                    <ValidationMessage For="@(() => UserModel.PhoneNumber)" />
+                </div>
+                
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        <InputCheckbox @bind-Value="UserModel.PhoneNumberConfirmed" class="form-check-input" />
+                        Phone Number Confirmed
+                    </label>
+                </div>
+                
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        <InputCheckbox @bind-Value="UserModel.TwoFactorEnabled" class="form-check-input" />
+                        Two-Factor Enabled
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label for="LockoutEnd">Lockout End</label>
+                    <InputDate @bind-Value="UserModel.LockoutEnd" class="form-control" id="LockoutEnd" />
+                    <ValidationMessage For="@(() => UserModel.LockoutEnd)" />
+                </div>
+                
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        <InputCheckbox @bind-Value="UserModel.LockoutEnabled" class="form-check-input" />
+                        Lockout Enabled
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label for="AccessFailedCount">Access Failed Count</label>
+                    <InputNumber @bind-Value="UserModel.AccessFailedCount" class="form-control" id="AccessFailedCount" />
+                    <ValidationMessage For="@(() => UserModel.AccessFailedCount)" />
+                </div>
+                
+                <br>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <button @onclick="NavigateToManageUsers" class="btn btn-warning">Back to Manage Users</button>
+</div>
+
+
+@code {
+    [Parameter]
+    public string? username { get; set; }
+
+    private User? UserModel { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(username))
+        {
+            UserModel = await AdminService.GetUserDetailsAsync(username) ?? new User 
+            {
+                FirstName = "",
+                LastName = "",
+                UserName = username
+            };
+        }
+        else
+        {
+            UserModel = new User
+            {
+                FirstName = "",
+                LastName = "",
+                UserName = ""
+            };
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            var result = await AdminService.SaveUserAsync(UserModel!);
+            if (result) 
+            { 
+                NavigationManager.NavigateTo("/admin/manageUsers"); 
+            }
+            
+            // For now, just log and navigate back
+            Console.WriteLine($"User {UserModel?.UserName} updated");
+            NavigationManager.NavigateTo("/admin/manageUsers");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating user: {ex.Message}");
+            // Handle error (show message to user, etc.)
+        }
+    }
+
+    private void NavigateToManageUsers()
+    {
+        NavigationManager.NavigateTo("/admin/manageUsers");
+    }
+}

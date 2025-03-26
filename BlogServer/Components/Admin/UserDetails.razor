@@ -1,0 +1,86 @@
+@page "/admin/userDetails/{username}"
+@using BlogLibrary.Models
+@using BlogServer.Services
+@inject NavigationManager NavigationManager
+@inject AdminService AdminService
+
+@if (user == null)
+{
+    <p>Loading user details...</p>
+}
+else
+{
+    <h1>User Details</h1>
+    <div>
+        <h4>of @user.FirstName @user.LastName</h4>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-2">First Name</dt>
+            <dd class="col-sm-10">@user.FirstName</dd>
+
+            <dt class="col-sm-2">Last Name</dt>
+            <dd class="col-sm-10">@user.LastName</dd>
+
+            <dt class="col-sm-2">Username</dt>
+            <dd class="col-sm-10">@user.UserName</dd>
+
+            <dt class="col-sm-2">Normalized Username</dt>
+            <dd class="col-sm-10">@user.NormalizedUserName</dd>
+
+            <dt class="col-sm-2">Email</dt>
+            <dd class="col-sm-10">@user.Email</dd>
+
+            <dt class="col-sm-2">Normalized Email</dt>
+            <dd class="col-sm-10">@user.NormalizedEmail</dd>
+
+            <dt class="col-sm-2">Email Confirmed</dt>
+            <dd class="col-sm-10">@user.EmailConfirmed</dd>
+
+            <dt class="col-sm-2">Phone Number</dt>
+            <dd class="col-sm-10">@user.PhoneNumber</dd>
+
+            <dt class="col-sm-2">Phone Confirmed</dt>
+            <dd class="col-sm-10">@user.PhoneNumberConfirmed</dd>
+
+            <dt class="col-sm-2">Two-Factor Enabled</dt>
+            <dd class="col-sm-10">@user.TwoFactorEnabled</dd>
+
+            <dt class="col-sm-2">Lockout End</dt>
+            <dd class="col-sm-10">@user.LockoutEnd?.ToString()</dd>
+
+            <dt class="col-sm-2">Lockout Enabled</dt>
+            <dd class="col-sm-10">@user.LockoutEnabled</dd>
+
+            <dt class="col-sm-2">Access Failed Count</dt>
+            <dd class="col-sm-10">@user.AccessFailedCount</dd>
+        </dl>
+    </div>
+
+    <div>
+        <button @onclick="@(() => EditUser(user.UserName!))" class="btn btn-primary">Edit</button>
+        <br />
+        <button @onclick="BackToManageUsers" class="btn btn-warning mt-2">Back to Manage Users</button>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string? username { get; set; }
+
+    private User? user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await AdminService.GetUserDetailsAsync(username!);
+    }
+
+    private void EditUser(string username)
+    {
+        NavigationManager.NavigateTo($"/admin/editUser/{username}");
+    }
+
+    private void BackToManageUsers()
+    {
+        NavigationManager.NavigateTo("/admin/manageUsers");
+    }
+}
