@@ -1,0 +1,6 @@
+.quickgrid-table tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.05); /* Light gray for even rows */
+}
+
+/* Stop the last page from collapsing to the number of rows on it */
+::deep tr { height: 1.8rem; }

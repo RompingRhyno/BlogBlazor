@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject ArticleApiClient ArticleApi
 @using BlogLibrary.Models
+@using Microsoft.AspNetCore.Components.QuickGrid
 
 <PageTitle>Articles</PageTitle>
 
@@ -11,49 +12,51 @@
 {
     <p>Loading articles...</p>
 }
-else if (!articles.Any())
-{
-    <p>No articles available.</p>
-}
 else
 {
-    <div class="row">
-        @foreach (var article in articles)
-        {
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">@article.Title</h5>
-                        <p class="card-text">
-                            <strong>@(article.ContributorUsername ?? "Unknown Author")</strong>,
-                            @article.StartDate?.ToString("MMMM dd, yyyy")
-                        </p>
-                        <p class="card-text">
-                            @if (!string.IsNullOrEmpty(article.Body) && article.Body.Length > 100)
-                            {
-                                @($"{article.Body.Substring(0, 100)}...")
-                                <NavLink href="@($"/article/{article.ArticleId}")">Read More</NavLink>
-                            }
-                            else
-                            {
-                                @article.Body
-                            }
-                        </p>
-                    </div>
-                </div>
-            </div>
-        }
+    <input type="text" @bind="titleFilter" placeholder="Search by title..." class="form-control mb-3 w-25" />
+    <div class="grid">
+        <QuickGrid Items="@FilteredArticles" Pagination="@pagination" Class="table table-striped">
+            <PropertyColumn Property="@(context => context.Title)" Title="Title" />
+
+            <TemplateColumn Title="Article">
+                <QuickGridTemplate>
+                    @{
+                        var truncatedBody = string.IsNullOrEmpty(context.Body)
+                        ? ""
+                        : (context.Body.Length > 100 ? context.Body.Substring(0, 100) + "..." : context.Body);
+                    }
+                    @truncatedBody
+                    <a href="@($"/article/{context.ArticleId}")">Read More</a>
+                </QuickGridTemplate>
+            </TemplateColumn>
+
+            <PropertyColumn Property="@(context => context.ContributorUsername)" Title="Author" />
+            <PropertyColumn Property="@(context => context.StartDate)" Title="Date Published" Format="MMMM dd, yyyy" />
+        </QuickGrid>
+        <Paginator State="@pagination" />
+
     </div>
 }
 
 @code {
     private List<Article>? articles;
+    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
+    private string titleFilter = "";
+    private IQueryable<Article> itemsQueryable = Enumerable.Empty<Article>().AsQueryable();
+
+    // Computed property to filter articles by title
+    private IQueryable<Article> FilteredArticles =>
+    string.IsNullOrEmpty(titleFilter)
+    ? itemsQueryable
+    : itemsQueryable.Where(c => c.Title.Contains(titleFilter, StringComparison.OrdinalIgnoreCase));
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            articles = (await ArticleApi.GetArticlesAsync(10)).ToList();
+            articles = (await ArticleApi.GetArticlesAsync(50)).ToList();
+            itemsQueryable = articles.AsQueryable(); // Initialize the IQueryable source
         }
         catch (Exception ex)
         {
