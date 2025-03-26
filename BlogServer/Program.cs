@@ -6,6 +6,7 @@ using BlogServer.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +61,8 @@ builder.Services.AddScoped<AdminService>();
 builder.Services.AddScoped<UserService>();
 
 builder.Services.AddServerSideBlazor();
+
+builder.Services.AddMudServices();
 
 // Authentication
 builder
