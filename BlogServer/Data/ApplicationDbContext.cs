@@ -16,6 +16,10 @@ public class ApplicationDbContext : IdentityDbContext<User>
         base.OnModelCreating(builder);
 
         builder.Entity<Article>().Property(c => c.ArticleId).IsRequired();
+        builder.Entity<Article>()
+            .HasOne(a => a.Contributor)
+            .WithMany()
+            .OnDelete(DeleteBehavior.Cascade);
         builder.Entity<Article>().ToTable("Articles");
     }
 

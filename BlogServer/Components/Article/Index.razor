@@ -114,10 +114,15 @@ else
         if (await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this article? This action cannot be undone."))
         {
             var success = await UserService.DeleteArticleAsync(articleId);
-            if (success)
+            if (!success)
             {
-                articles = await UserService.GetAllArticlesAsync();
+                await JSRuntime.InvokeVoidAsync("alert", "Failed to delete this article.");
             }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Successfully deleted this article.");
+            }
+            articles = await UserService.GetAllArticlesAsync();
         }
     }
 }

@@ -270,7 +270,8 @@ namespace BlogServer.Migrations
                 {
                     b.HasOne("BlogLibrary.Models.User", "Contributor")
                         .WithMany()
-                        .HasForeignKey("ContributorId");
+                        .HasForeignKey("ContributorId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Contributor");
                 });

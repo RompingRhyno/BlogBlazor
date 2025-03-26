@@ -64,6 +64,12 @@ namespace BlogServer.Services
         {
             var user = await _userManager.FindByNameAsync(userName);
             if (user == null) return false;
+
+            // First delete all articles by this user
+            var articles = _context.Articles.Where(a => a.ContributorUsername == user.UserName);
+            _context.Articles.RemoveRange(articles);
+            await _context.SaveChangesAsync();
+
             var result = await _userManager.DeleteAsync(user); // Soft delete is an option also
             
             return result.Succeeded; // Return a success status

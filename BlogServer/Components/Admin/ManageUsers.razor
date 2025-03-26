@@ -8,7 +8,7 @@
 
 @inject AdminService adminService
 @inject NavigationManager NavigationManager
-@inject IJSRuntime _jsRuntime
+@inject IJSRuntime JSRuntime
 
 <h1>Manage Users</h1>
 
@@ -119,12 +119,12 @@ else
             var success = await adminService.UpdateRolesAsync(userName, isContributor);        
             if (!success)
             {
-                await _jsRuntime.InvokeVoidAsync("alert", "Failed to update role");
+                await JSRuntime.InvokeVoidAsync("alert", "Failed to update role");
             }
         }
         catch (Exception ex)
         {
-            await _jsRuntime.InvokeVoidAsync("alert", $"Error: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"Error: {ex.Message}");
         }
         finally
         {
@@ -144,7 +144,7 @@ else
 
     private async Task ConfirmBan(string userName)
     {
-        if (await _jsRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to ban {userName}?"))
+        if (await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to ban {userName}?"))
         {
             await BanUser(userName);
         }
@@ -153,9 +153,14 @@ else
     private async Task BanUser(string userName)
     {
         bool success = await adminService.BanUserAsync(userName);
-        if (success)
+        if (!success)
         {
-            await LoadUsers(); // Refresh user list after banning
+            await JSRuntime.InvokeVoidAsync("alert", "Failed to ban this user.");
         }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Successfully banned this user.");
+        }
+        await LoadUsers(); // Refresh user list after banning
     }
 }
